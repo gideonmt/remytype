@@ -2,6 +2,8 @@ mod layout;
 mod render_menu;
 mod render_test;
 mod render_stats;
+mod render_settings;
+mod render_user_stats;
 
 use ratatui::{
     layout::{Constraint, Direction, Layout},
@@ -26,6 +28,8 @@ pub fn render(f: &mut Frame, app: &App) {
         AppMode::Menu => render_menu::render(f, app, chunks[1]),
         AppMode::Test => render_test::render(f, app, chunks[1]),
         AppMode::Results => render_stats::render(f, app, chunks[1]),
+        AppMode::Stats => render_user_stats::render(f, app, chunks[1]),
+        AppMode::Settings => render_settings::render(f, app, chunks[1]),
     }
 
     layout::render_footer(f, app, chunks[2]);

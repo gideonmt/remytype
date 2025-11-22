@@ -50,7 +50,14 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App) 
                 AppMode::Menu => {
                     match key.code {
                         KeyCode::Char('q') => return Ok(()),
-                        KeyCode::Enter => app.start_test(),
+                        KeyCode::Enter => {
+                            match app.menu_selection {
+                                0 => app.start_test(),
+                                1 => app.open_stats(),
+                                2 => app.open_settings(),
+                                _ => {}
+                            }
+                        }
                         KeyCode::Up => app.menu_up(),
                         KeyCode::Down => app.menu_down(),
                         _ => {}
@@ -67,6 +74,23 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App) 
                 AppMode::Results => {
                     match key.code {
                         KeyCode::Esc | KeyCode::Enter => app.return_to_menu(),
+                        _ => {}
+                    }
+                }
+                AppMode::Stats => {
+                    match key.code {
+                        KeyCode::Esc | KeyCode::Enter => app.return_to_menu(),
+                        _ => {}
+                    }
+                }
+                AppMode::Settings => {
+                    match key.code {
+                        KeyCode::Esc => app.return_to_menu(),
+                        KeyCode::Up => app.settings_up(),
+                        KeyCode::Down => app.settings_down(),
+                        KeyCode::Left => app.modify_setting(false),
+                        KeyCode::Right => app.modify_setting(true),
+                        KeyCode::Enter => app.return_to_menu(),
                         _ => {}
                     }
                 }

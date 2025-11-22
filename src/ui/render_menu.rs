@@ -31,9 +31,9 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
 
     // Menu options
     let menu_items = vec![
-        "Quick Test (30s)",
-        "Practice Mode",
+        "Start Test",
         "View Statistics",
+        "Settings",
     ];
 
     let items: Vec<ListItem> = menu_items

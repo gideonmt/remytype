@@ -17,7 +17,6 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         ])
         .split(area);
 
-    // Timer/Progress
     let progress_text = if let Some(start) = app.start_time {
         let elapsed = start.elapsed().as_secs();
         format!("Time: {}s | Progress: {}/{}", elapsed, app.current_pos, app.test_text.len())
@@ -31,12 +30,10 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         .block(Block::default().borders(Borders::ALL).title("Progress"));
     f.render_widget(progress, chunks[0]);
 
-    // Text display with highlighting
     let mut spans = Vec::new();
     
     for (i, ch) in app.test_text.chars().enumerate() {
         let style = if i < app.current_pos {
-            // Already typed
             if i < app.current_input.len() {
                 let typed = app.current_input.chars().nth(i).unwrap();
                 if typed == ch {
@@ -48,10 +45,8 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
                 Style::default().fg(Color::Green)
             }
         } else if i == app.current_pos {
-            // Current position
             Style::default().fg(Color::Black).bg(Color::White).add_modifier(Modifier::BOLD)
         } else {
-            // Not yet typed
             Style::default().fg(Color::Gray)
         };
         
@@ -64,7 +59,6 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         .block(Block::default().borders(Borders::ALL).title("Type this text"));
     f.render_widget(text_display, chunks[1]);
 
-    // Current input display
     let input_display = Paragraph::new(app.current_input.as_str())
         .style(Style::default().fg(Color::White))
         .alignment(Alignment::Center)

@@ -16,9 +16,11 @@ pub fn render_header(f: &mut Frame, area: Rect) {
 
 pub fn render_footer(f: &mut Frame, app: &App, area: Rect) {
     let help_text = match app.mode {
-        AppMode::Menu => "[↑/↓] Navigate | [Enter] Start | [q] Quit",
+        AppMode::Menu => "[↑/↓] Navigate | [Enter] Select | [q] Quit",
         AppMode::Test => "[Esc] Cancel | Type to test your speed!",
         AppMode::Results => "[Enter/Esc] Return to menu",
+        AppMode::Stats => "[Enter/Esc] Return to menu",
+        AppMode::Settings => "[↑/↓] Navigate | [←/→] Adjust | [Enter/Esc] Back to menu",
     };
 
     let footer = Paragraph::new(help_text)
