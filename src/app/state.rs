@@ -1,4 +1,5 @@
 use std::time::Instant;
+use crate::languages::LanguageManager;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum AppMode {
@@ -30,7 +31,7 @@ impl Default for Settings {
             test_mode: TestMode::Time,
             word_count: 50,
             time_limit: 30,
-            language: "english_200".to_string(),
+            language: "english_1k".to_string(),
             lines_to_display: 3,
         }
     }
@@ -73,15 +74,20 @@ pub struct App {
     pub accuracy: f64,
     pub settings: Settings,
     pub user_stats: UserStats,
+    pub language_manager: LanguageManager,
 }
 
 impl App {
     pub fn new() -> Self {
+        let language_manager = LanguageManager::new();
+        let settings = Settings::default();
+        let test_text = language_manager.generate_text(&settings.language, settings.word_count);
+        
         Self {
             mode: AppMode::Menu,
             menu_selection: 0,
             settings_selection: 0,
-            test_text: String::from("the quick brown fox jumps over the lazy dog"),
+            test_text,
             current_input: String::new(),
             current_pos: 0,
             start_time: None,
@@ -89,8 +95,9 @@ impl App {
             errors: 0,
             wpm: 0.0,
             accuracy: 0.0,
-            settings: Settings::default(),
+            settings,
             user_stats: UserStats::default(),
+            language_manager,
         }
     }
 
@@ -121,12 +128,14 @@ impl App {
     pub fn modify_setting(&mut self, increase: bool) {
         match self.settings_selection {
             0 => {
+                // Toggle test mode
                 self.settings.test_mode = match self.settings.test_mode {
                     TestMode::Words => TestMode::Time,
                     TestMode::Time => TestMode::Words,
                 };
             }
             1 => {
+                // Modify word count
                 if increase && self.settings.word_count < 200 {
                     self.settings.word_count += 10;
                 } else if !increase && self.settings.word_count > 10 {
@@ -134,6 +143,7 @@ impl App {
                 }
             }
             2 => {
+                // Modify time limit
                 if increase && self.settings.time_limit < 300 {
                     self.settings.time_limit += 15;
                 } else if !increase && self.settings.time_limit > 15 {
@@ -141,14 +151,15 @@ impl App {
                 }
             }
             3 => {
-                let languages = ["english_200", "english_1000", "english_10000"];
-                let current_idx = languages.iter().position(|&l| l == self.settings.language).unwrap_or(0);
+                // Cycle through languages
+                let languages = self.language_manager.available_languages();
+                let current_idx = languages.iter().position(|l| l == &self.settings.language).unwrap_or(0);
                 let next_idx = if increase {
                     (current_idx + 1) % languages.len()
                 } else {
                     if current_idx == 0 { languages.len() - 1 } else { current_idx - 1 }
                 };
-                self.settings.language = languages[next_idx].to_string();
+                self.settings.language = languages[next_idx].clone();
             }
             4 => {
                 // Modify lines to display
@@ -171,6 +182,12 @@ impl App {
     }
 
     pub fn start_test(&mut self) {
+        let word_count = match self.settings.test_mode {
+            TestMode::Words => self.settings.word_count,
+            TestMode::Time => 200,
+        };
+        self.test_text = self.language_manager.generate_text(&self.settings.language, word_count);
+        
         self.mode = AppMode::Test;
         self.current_input.clear();
         self.current_pos = 0;
@@ -184,6 +201,7 @@ impl App {
             self.start_time = Some(Instant::now());
         }
 
+        // Check time limit for time mode
         if self.settings.test_mode == TestMode::Time {
             if let Some(start) = self.start_time {
                 if start.elapsed().as_secs() >= self.settings.time_limit {

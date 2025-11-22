@@ -1,5 +1,6 @@
 mod app;
 mod ui;
+mod languages;
 
 use std::io;
 use crossterm::{
